@@ -1,6 +1,6 @@
 import { css } from 'styled-system/css';
 import { Stack } from 'styled-system/jsx';
-import { useCallback, useState } from 'react';
+import { useCallback, useId, useState } from 'react';
 
 import { AlertsModal } from './components/AlertsModal';
 import { ResultsTable } from './components/ResultsTable';
@@ -11,6 +11,7 @@ import { ViewSwitcher } from './components/ViewSwitcher';
 import { copy, filterSessions, type SessionFilterId, sessions, type ViewId } from './data/fixtures';
 
 export function App() {
+  const viewIdPrefix = useId();
   const [activeView, setActiveView] = useState<ViewId>('schedule');
   const [activeFilter, setActiveFilter] = useState<SessionFilterId>('all');
   const [isAlertsOpen, setIsAlertsOpen] = useState(false);
@@ -35,23 +36,46 @@ export function App() {
       <Stack gap="6">
         <SiteHeader onManageAlerts={() => setIsAlertsOpen(true)} />
         {isAlertsOpen && <AlertsModal onClose={handleCloseAlerts} />}
-        <ViewSwitcher activeView={activeView} onViewChange={setActiveView} />
-        {activeView === 'schedule' && (
-          <section className={css({ display: 'flex', flexDirection: 'column', gap: '4' })}>
-            <SessionFilters activeFilter={activeFilter} onFilterChange={setActiveFilter} />
-            <ScheduleList sessions={visibleSessions} />
-          </section>
-        )}
-        {activeView === 'results' && (
-          <section>
-            <ResultsTable />
-          </section>
-        )}
-        {activeView === 'medals' && (
-          <section>
+        <ViewSwitcher idPrefix={viewIdPrefix} activeView={activeView} onViewChange={setActiveView} />
+        <section
+          role="tabpanel"
+          id={`${viewIdPrefix}-panel-schedule`}
+          aria-labelledby={`${viewIdPrefix}-tab-schedule`}
+          hidden={activeView !== 'schedule'}
+          className={css({
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '4',
+            '&[hidden]': { display: 'none' },
+          })}
+        >
+          {activeView === 'schedule' && (
+            <>
+              <SessionFilters activeFilter={activeFilter} onFilterChange={setActiveFilter} />
+              <ScheduleList sessions={visibleSessions} />
+            </>
+          )}
+        </section>
+        <section
+          role="tabpanel"
+          id={`${viewIdPrefix}-panel-results`}
+          aria-labelledby={`${viewIdPrefix}-tab-results`}
+          hidden={activeView !== 'results'}
+          tabIndex={activeView === 'results' ? 0 : -1}
+        >
+          {activeView === 'results' && <ResultsTable />}
+        </section>
+        <section
+          role="tabpanel"
+          id={`${viewIdPrefix}-panel-medals`}
+          aria-labelledby={`${viewIdPrefix}-tab-medals`}
+          hidden={activeView !== 'medals'}
+          tabIndex={activeView === 'medals' ? 0 : -1}
+        >
+          {activeView === 'medals' && (
             <p className={css({ color: 'text.primary', textStyle: 't_medium' })}>{copy.medals}</p>
-          </section>
-        )}
+          )}
+        </section>
       </Stack>
     </main>
   );
