@@ -53,6 +53,7 @@ const sortButtonClass = css({
   color: 'text.primary',
   cursor: 'pointer',
   p: '0',
+  whiteSpace: 'nowrap',
   textStyle: 't_small_b',
   _focusVisible: {
     outlineColor: 'focus.default',
@@ -92,6 +93,8 @@ export function ResultsTable() {
     setColumn(nextColumn);
   };
 
+  const sortDirection = directions[column] === 'asc' ? 'ascending' : 'descending';
+  const sortIndicator = directions[column] === 'asc' ? '▲' : '▼';
   const sortedRows = sortResults(results, column, directions[column]);
 
   return (
@@ -101,29 +104,43 @@ export function ResultsTable() {
           <caption className={captionClass}>{copy.resultsCaption}</caption>
           <thead>
             <tr>
-              <th className={headerCellClass}>
+              <th scope="col" aria-sort={column === 'rank' ? sortDirection : undefined} className={headerCellClass}>
                 <button
                   type="button"
-                  aria-label="Sort by rank"
+                  aria-label="Sort by Rank"
                   className={sortButtonClass}
                   onClick={() => handleSort('rank')}
                 >
                   {copy.rank}
+                  <span
+                    aria-hidden="true"
+                    className={css({ display: 'inline-block', w: '1em', ml: '1', textAlign: 'center' })}
+                  >
+                    {column === 'rank' ? sortIndicator : '↕'}
+                  </span>
                 </button>
               </th>
-              <th className={headerCellClass}>
+              <th scope="col" aria-sort={column === 'bib' ? sortDirection : undefined} className={headerCellClass}>
                 <button
                   type="button"
-                  aria-label="Sort by rank"
+                  aria-label="Sort by Bib"
                   className={sortButtonClass}
                   onClick={() => handleSort('bib')}
                 >
                   {copy.bib}
+                  <span
+                    aria-hidden="true"
+                    className={css({ display: 'inline-block', w: '1em', ml: '1', textAlign: 'center' })}
+                  >
+                    {column === 'bib' ? sortIndicator : '↕'}
+                  </span>
                 </button>
               </th>
-              <th className={headerCellClass} />
-              <th className={headerCellClass}>{copy.noc}</th>
-              <th className={headerCellClass}>{copy.status}</th>
+              <th scope="col" className={headerCellClass}>
+                <span className={css({ srOnly: true })}>Athlete</span>
+              </th>
+              <th scope="col" className={headerCellClass}>{copy.noc}</th>
+              <th scope="col" className={headerCellClass}>{copy.status}</th>
             </tr>
           </thead>
           <tbody>
@@ -134,21 +151,13 @@ export function ResultsTable() {
                 <td className={bodyCellClass}>{row.athlete}</td>
                 <td className={bodyCellClass}>{row.noc}</td>
                 <td className={cx(bodyCellClass, standingClass[row.standing])}>
-                  {copy.statusMark}
+                  {row.standing}
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
       </Box>
-      <table className={css({ srOnly: true })}>
-        <caption>{copy.resultsCaption}</caption>
-        <tbody>
-          <tr>
-            <td>{copy.statusMark}</td>
-          </tr>
-        </tbody>
-      </table>
     </Box>
   );
 }
