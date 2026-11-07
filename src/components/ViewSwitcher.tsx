@@ -1,15 +1,18 @@
 import { css } from 'styled-system/css';
-import type { MouseEvent } from 'react';
+import type { KeyboardEvent } from 'react';
 
-import { type ViewId, type ViewOption, views } from '../data/fixtures';
+import { type ViewId, views } from '../data/fixtures';
 
 export interface ViewSwitcherProps {
+  idPrefix: string;
   activeView: ViewId;
   onViewChange: (view: ViewId) => void;
 }
 
 const tabClass = css({
   alignItems: 'center',
+  bg: 'transparent',
+  cursor: 'pointer',
   borderBottomColor: 'transparent',
   borderBottomStyle: 'solid',
   borderBottomWidth: 'sm',
@@ -32,10 +35,30 @@ const tabClass = css({
   },
 });
 
-export function ViewSwitcher({ activeView, onViewChange }: ViewSwitcherProps) {
-  const handleSelect = (event: MouseEvent<HTMLAnchorElement>, view: ViewId) => {
+export function ViewSwitcher({ idPrefix, activeView, onViewChange }: ViewSwitcherProps) {
+  const handleKeyDown = (event: KeyboardEvent<HTMLButtonElement>, index: number) => {
+    const nextKeys = ['ArrowRight', 'ArrowDown'];
+    const previousKeys = ['ArrowLeft', 'ArrowUp'];
+    let nextIndex: number;
+
+    if (nextKeys.includes(event.key)) {
+      nextIndex = (index + 1) % views.length;
+    } else if (previousKeys.includes(event.key)) {
+      nextIndex = (index - 1 + views.length) % views.length;
+    } else if (event.key === 'Home') {
+      nextIndex = 0;
+    } else if (event.key === 'End') {
+      nextIndex = views.length - 1;
+    } else {
+      return;
+    }
+
     event.preventDefault();
-    onViewChange(view);
+    const nextView = views[nextIndex];
+    if (nextView) {
+      document.getElementById(`${idPrefix}-tab-${nextView.id}`)?.focus();
+      onViewChange(nextView.id);
+    }
   };
 
   return (
@@ -51,17 +74,21 @@ export function ViewSwitcher({ activeView, onViewChange }: ViewSwitcherProps) {
         gap: '2',
       })}
     >
-      {views.map((view: ViewOption) => (
-        <a
+      {views.map((view, index) => (
+        <button
           key={view.id}
-          href={view.href}
+          type="button"
+          id={`${idPrefix}-tab-${view.id}`}
+          aria-controls={`${idPrefix}-panel-${view.id}`}
+          tabIndex={view.id === activeView ? 0 : -1}
           role="tab"
           aria-selected={view.id === activeView}
           className={tabClass}
-          onClick={(event) => handleSelect(event, view.id)}
+          onClick={() => onViewChange(view.id)}
+          onKeyDown={(event) => handleKeyDown(event, index)}
         >
           {view.label}
-        </a>
+        </button>
       ))}
     </div>
   );
