@@ -1,5 +1,5 @@
 import { css } from 'styled-system/css';
-import { useState } from 'react';
+import { useId, useState } from 'react';
 
 import { copy, type Session } from '../data/fixtures';
 
@@ -28,6 +28,7 @@ const detailsButtonClass = css({
 });
 
 export function ScheduleList({ sessions }: ScheduleListProps) {
+  const detailsIdPrefix = useId();
   const [expandedIds, setExpandedIds] = useState<ReadonlySet<string>>(() => new Set());
 
   const handleToggle = (sessionId: string) => {
@@ -55,6 +56,7 @@ export function ScheduleList({ sessions }: ScheduleListProps) {
     >
       {sessions.map((session) => {
         const isExpanded = expandedIds.has(session.id);
+        const detailsId = `${detailsIdPrefix}-${session.id}-details`;
 
         return (
           <li
@@ -81,23 +83,25 @@ export function ScheduleList({ sessions }: ScheduleListProps) {
             <button
               type="button"
               aria-expanded={isExpanded}
+              aria-label={`${copy.details} for ${session.name}`}
+              aria-controls={detailsId}
               className={detailsButtonClass}
               onClick={() => handleToggle(session.id)}
             >
               {copy.details}
             </button>
-            {isExpanded && (
-              <p
-                className={css({
-                  color: 'text.primary',
-                  flexBasis: '100%',
-                  textStyle: 't_small',
-                  w: 'full',
-                })}
-              >
-                {session.detail}
-              </p>
-            )}
+            <p
+              id={detailsId}
+              hidden={!isExpanded}
+              className={css({
+                color: 'text.primary',
+                flexBasis: '100%',
+                textStyle: 't_small',
+                w: 'full',
+              })}
+            >
+              {session.detail}
+            </p>
           </li>
         );
       })}
