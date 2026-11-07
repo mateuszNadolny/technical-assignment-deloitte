@@ -21,19 +21,6 @@ Two reports from colleagues, without a prescribed root cause:
 
 Do not assume those are the only issues. Do not change the event, the athlete names, or the available views.
 
-## Mail content
-
-Please find attached the technical assignment for the accessibility (WCAG).
-The package contains a single standalone React application (“Championship Day”). The page is intentionally inaccessible, while the visual layout is intentional and should remain unchanged. Any interactions that currently work with a mouse should continue to work.
-
-Please:
-
-- Audit the rendered page, identifying the user impact, the relevant WCAG 2.1 criterion, and a specific recommended fix.
-- Implement the necessary accessibility improvements in the application.
-- Add or update tests to ensure the fixed behavior is maintained.
-- Preserve the same content, mouse interactions, and a usable responsive layout from narrow mobile screens to desktop.
-- Publish the final solution on GitHub, including the updated application and written accessibility audit
-
 ## Run
 
 This app is self-contained. Install and run it from this folder:
